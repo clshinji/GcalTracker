@@ -10,8 +10,8 @@ Googleカレンダーに入力した予定を、ボタン一つでGoogleスプ�
 ### 1. 準備：自分のスプレッドシートとして保存しよう
 まずは、ツールを自分のGoogleドライブに保存しましょう。
 
-1.  以下のリンクをクリックします。
-    *   **<a href="https://docs.google.com/spreadsheets/d/1phJj0bITEmJD2l5hkVwBLS-9nDrhZekkszzSnZa1UiQ/copy" target="_blank">コピー用URL</a>**
+1.  以下のリンクをクリックします。（別のタブで開くのがおすすめ）
+    *   **[コピー用URL](https://docs.google.com/spreadsheets/d/1phJj0bITEmJD2l5hkVwBLS-9nDrhZekkszzSnZa1UiQ/copy)**
 2.  **「コピーを作成」** ボタンを押します。
 3.  自分のGoogleドライブに、あなた専用のツールが作成されます。
 
