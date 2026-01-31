@@ -11,7 +11,7 @@ Googleカレンダーに入力した予定を、ボタン一つでGoogleスプ�
 まずは、ツールを自分のGoogleドライブに保存しましょう。
 
 1.  以下のリンクをクリックします。
-    *   **[コピー用URL](https://docs.google.com/spreadsheets/d/1phJj0bITEmJD2l5hkVwBLS-9nDrhZekkszzSnZa1UiQ/copy)**
+    *   **<a href="https://docs.google.com/spreadsheets/d/1phJj0bITEmJD2l5hkVwBLS-9nDrhZekkszzSnZa1UiQ/copy" target="_blank">コピー用URL</a>**
 2.  **「コピーを作成」** ボタンを押します。
 3.  自分のGoogleドライブに、あなた専用のツールが作成されます。
 
