@@ -1,3 +1,50 @@
+#
+# Jekyll configuration
+# See: https://jekyllrb.com/docs/configuration/
+#
+# For the Chirpy theme, see: https://github.com/cotes2020/jekyll-theme-chirpy
+#
+
 title: Googleカレンダー作業実績集計ツール
-description: Googleカレンダーの予定を1クリックでスプレッドシートに集計します。
-theme: jekyll-theme-merlot
+tagline: Googleカレンダーの予定を1クリックでスプレッドシートに集計
+description: Google Apps Script (GAS) を活用した、フリーランスのための実績集計自動化ツール。
+
+# The site's URL
+url: 'https://clshinji.github.io'
+baseurl: '/GcalTracker'
+
+author:
+  name: clshinji
+  twitter: clshinji
+  # github: clshinji
+
+# Theme
+remote_theme: cotes2020/jekyll-theme-chirpy
+
+# Language & Timezone
+lang: ja-JP
+timezone: Asia/Tokyo
+
+# Markdown settings
+markdown: kramdown
+highlighter: rouge
+
+# Pagination
+paginate: 10
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - spec/
+  - .clasp.json
+  - appsscript.json
+  - code.js
+
+# Chirpy settings
+theme_mode: light # [light, dark]
