@@ -1,11 +1,3 @@
----
-title: Googleカレンダー作業実績集計ツール
-author: clshinji
-date: 2026-02-01 00:00:00 +0900
-categories: [Tool, GAS]
-tags: [google-calendar, spreadsheet, gas]
----
-
 # Googleカレンダー作業実績集計ツール
 
 Googleカレンダーに入力した予定を、ボタン一つでGoogleスプレッドシートに自動集計するツールです。
