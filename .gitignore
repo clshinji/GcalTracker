@@ -20,6 +20,8 @@ yarn-error.log*
 
 # GAS (clasp)
 .clasp.json
+.clasp.*.json
+.clasp.env.json
 
 # Project specific
 config.json
