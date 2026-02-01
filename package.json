@@ -1,0 +1,25 @@
+{
+  "name": "gcal-tracker",
+  "version": "1.0.0",
+  "description": "Googleカレンダーに入力した予定を、ボタン一つでGoogleスプレッドシートに自動集計するツールです。 フリーランスの方の業務報告や、日々の時間管理を効率化するために作られました。",
+  "main": "code.js",
+  "scripts": {
+    "use:dev": "node scripts/switch-env.js dev",
+    "use:prod": "node scripts/switch-env.js prod",
+    "push:dev": "npm run use:dev && clasp push",
+    "push:prod": "npm run use:prod && clasp push",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clshinji/GcalTracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/clshinji/GcalTracker/issues"
+  },
+  "homepage": "https://github.com/clshinji/GcalTracker#readme"
+}

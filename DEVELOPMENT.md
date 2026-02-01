@@ -1,70 +1,48 @@
 # 開発者ガイド
 
-このドキュメントでは、本ツールの開発環境の構築方法および開発フローについて説明します。
+## 環境セットアップ
 
-## 🛠 開発環境の構築
-
-本プロジェクトでは、Google Apps Script (GAS) のローカル開発のために [clasp](https://github.com/google/clasp) を使用しています。
-
-### 前提条件
-- [Node.js](https://nodejs.org/) がインストールされていること。
-
-### 手順
-1.  **clasp をインストールする**
-    ```bash
-    npm install -g @google/clasp
-    ```
-
-2.  **Google アカウントにログインする**
-    ```bash
-    clasp login
-    ```
-
-3.  **リポジトリをクローンする**
+1.  **リポジトリのクローン**
     ```bash
     git clone https://github.com/clshinji/GcalTracker.git
     cd GcalTracker
     ```
 
-4.  **GAS プロジェクトを紐付ける**
-    `.clasp.json` はセキュリティのためリポジトリに含まれていません。以下のいずれかの方法で自分用の GAS プロジェクトを作成してください。
-
-    **A. 新しく GAS プロジェクトを作る場合**
+2.  **依存関係のインストール**
     ```bash
-    clasp create --title "GcalTracker" --type sheet
-    ```
-    ※スプレッドシートが新しく作成されます。
-
-    **B. 既存の GAS プロジェクト（コピーしたスプレッドシートなど）を使う場合**
-    ```bash
-    clasp setting scriptId "あなたのスクリプトID"
-    ```
-    ※スクリプトIDは、GAS エディタの「プロジェクトの設定」から確認できます。
-
-## 🔄 開発フロー
-
-1.  **コードを修正する**
-    ローカルの `code.js` や `appsscript.json` を編集します。
-
-2.  **GAS に反映する**
-    以下のコマンドを実行して、オンラインの GAS エディタにコードをアップロードします。
-    ```bash
-    clasp push
+    npm install
     ```
 
-3.  **GAS 上で動作確認する**
-    スプレッドシートを開き、メニューから機能を実行して動作を確認します。
+3.  **機密情報の作成（推奨）**
+    本プロジェクトでは、GASのスクリプトIDを Git 管理外のファイルで管理することを推奨しています。
+    `.clasp.env.json.sample` をコピーして `.clasp.env.json` を作成し、適切なスクリプトIDを記入してください。
+    ```bash
+    cp .clasp.env.json.sample .clasp.env.json
+    ```
+    ※ `.clasp.env.json` を作らずに、直接 `.clasp.json` を作成して管理することも可能です。
 
-## 📁 ディレクトリ構造
+4.  **環境の切り替え・生成**
+    以下のコマンドを実行して `.clasp.json` を生成します。引数なしの場合はデフォルトで `dev` 環境（なければ `prod`）がセットされます。
+    ```bash
+    npm run use:dev
+    ```
 
-- `code.js`: GAS のメインロジック。
-- `appsscript.json`: GAS の設定（マニフェストファイル）。
-- `.clasp.json`: clasp の設定ファイル（git 管理外）。
-- `spec/`: 仕様書（SDD）を格納するディレクトリ。
-- `README.md`: 一般ユーザー向けマニュアル。
-- `DEVELOPMENT.md`: 開発者向けガイド（本書）。
+## 開発フロー
 
-## 🤝 貢献について
+-   **コードの修正**: `code.js` や `appsscript.json` を編集します。
+-   **GASへの反映**:
+    ```bash
+    # 開発環境にプッシュ
+    npm run push:dev
 
-不具合の報告や機能改善の提案は、GitHub の Issue または Pull Request で受け付けています。
-仕様の変更を伴う場合は、`spec/` ディレクトリ内のドキュメントも合わせて更新してください。
+    # 本番環境にプッシュ（慎重に！）
+    npm run push:prod
+    ```
+
+## 環境切り替えの仕様
+-   **自動フォールバック**: `.clasp.env.json` に `dev` 設定がない場合、自動的に `prod` 設定を使用して `.clasp.json` を生成します。
+-   **直接管理のサポート**: `.clasp.env.json` がなくても、既に `.clasp.json` が存在する場合はそれが優先的に使用されます。
+
+## 注意事項
+-   `.clasp.json` や `.clasp.env.json` は Git にコミットしないでください（`.gitignore` で設定済み）。
+-   本番環境への `push` は、必ず動作確認を行ってから実施してください。
