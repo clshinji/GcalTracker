@@ -141,80 +141,102 @@ function getConfig() {
   const sheet = ss.getSheetByName('設定');
   if (!sheet) throw new Error('「設定」シートが見つかりません。');
   
-  const startDate = sheet.getRange('A2').getValue();
-  const endDate = sheet.getRange('B2').getValue();
-  const calendarNameInput = sheet.getRange('C2').getValue();
-  const keyword = sheet.getRange('D2').getValue();
-  
-  if (!startDate || !endDate) throw new Error('開始日と終了日を正しく入力してください。');
-  if (!(startDate instanceof Date) || !(endDate instanceof Date)) throw new Error('日付の形式が正しくありません。');
-  if (!keyword) throw new Error('集計キーワードを入力してください。');
-  
-  const endDateTime = new Date(endDate);
-  endDateTime.setHours(23, 59, 59, 999);
-  
-  let calendarNames = [];
-  if (calendarNameInput) {
-    calendarNames = calendarNameInput.split(',').map(name => name.trim());
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+
+  const values = sheet.getRange(2, 1, lastRow - 1, 5).getValues();
+  const configList = [];
+
+  values.forEach((row, index) => {
+    const projectName = row[0] || '-';
+    const startDate = row[1];
+    const endDate = row[2];
+    const calendarNameInput = row[3];
+    const keyword = row[4];
+
+    // 必須項目のチェック（開始日、終了日、キーワード）
+    if (!startDate || !endDate || !keyword) return;
+    if (!(startDate instanceof Date) || !(endDate instanceof Date)) return;
+
+    const endDateTime = new Date(endDate);
+    endDateTime.setHours(23, 59, 59, 999);
+
+    let calendarNames = [];
+    if (calendarNameInput) {
+      calendarNames = calendarNameInput.split(',').map(name => name.trim());
+    }
+
+    configList.push({
+      projectName: projectName,
+      startDate: startDate,
+      endDate: endDateTime,
+      calendarNames: calendarNames,
+      keyword: keyword
+    });
+  });
+
+  if (configList.length === 0) {
+    throw new Error('有効な集計条件（開始日、終了日、キーワード）が入力されている行が見つかりませんでした。');
   }
-  
-  return {
-    startDate: startDate,
-    endDate: endDateTime,
-    calendarNames: calendarNames,
-    keyword: keyword
-  };
+
+  console.log('取得した設定:', configList);
+  return configList;
 }
 
 /**
  * 指定された条件に合うカレンダーの予定を取得します。
+ * @param {Array} configList 設定データの配列
  */
-function getTargetEvents(config) {
+function getTargetEvents(configList) {
   const allCalendars = CalendarApp.getAllCalendars();
-  const targetCalendars = [];
-  
-  if (config.calendarNames.length > 0) {
-    config.calendarNames.forEach(name => {
-      const found = allCalendars.find(cal => cal.getName() === name);
-      if (found) targetCalendars.push(found);
-    });
-    if (targetCalendars.length === 0) {
-      throw new Error(`指定されたカレンダーが見つかりませんでした。`);
-    }
-  } else {
-    targetCalendars.push(CalendarApp.getDefaultCalendar());
-  }
-  
   const results = [];
   const days = ['日', '月', '火', '水', '木', '金', '土'];
-  
-  targetCalendars.forEach(calendar => {
-    const calendarName = calendar.getName();
-    const events = calendar.getEvents(config.startDate, config.endDate);
-    events.forEach(event => {
-      const title = event.getTitle();
-      if (title.indexOf(config.keyword) !== -1) {
-        const start = event.getStartTime();
-        const end = event.getEndTime();
-        const diffMs = end.getTime() - start.getTime();
-        const hours = Math.round((diffMs / (1000 * 60 * 60)) * 100) / 100;
-        results.push([
-          Utilities.formatDate(start, 'JST', 'yyyy/MM/dd'),
-          days[start.getDay()],
-          calendarName,
-          Utilities.formatDate(start, 'JST', 'HH:mm'),
-          Utilities.formatDate(end, 'JST', 'HH:mm'),
-          hours,
-          title,
-          event.getDescription()
-        ]);
-      }
+
+  configList.forEach(config => {
+    const targetCalendars = [];
+    
+    if (config.calendarNames && config.calendarNames.length > 0) {
+      config.calendarNames.forEach(name => {
+        const found = allCalendars.find(cal => cal.getName() === name);
+        if (found) targetCalendars.push(found);
+      });
+    } else {
+      targetCalendars.push(CalendarApp.getDefaultCalendar());
+    }
+
+    targetCalendars.forEach(calendar => {
+      const calendarName = calendar.getName();
+      const events = calendar.getEvents(config.startDate, config.endDate);
+      
+      events.forEach(event => {
+        const title = event.getTitle();
+        if (title.indexOf(config.keyword) !== -1) {
+          const start = event.getStartTime();
+          const end = event.getEndTime();
+          const diffMs = end.getTime() - start.getTime();
+          const hours = Math.round((diffMs / (1000 * 60 * 60)) * 100) / 100;
+          
+          results.push([
+            config.projectName, // 案件名
+            Utilities.formatDate(start, 'JST', 'yyyy/MM/dd'),
+            days[start.getDay()],
+            calendarName,
+            Utilities.formatDate(start, 'JST', 'HH:mm'),
+            Utilities.formatDate(end, 'JST', 'HH:mm'),
+            hours,
+            config.keyword, // キーワード
+            title,
+            event.getDescription()
+          ]);
+        }
+      });
     });
   });
   
+  // 日付（1列目）と開始時間（4列目）でソート
   results.sort((a, b) => {
-    const dateA = new Date(a[0] + ' ' + a[3]);
-    const dateB = new Date(b[0] + ' ' + b[3]);
+    const dateA = new Date(a[1] + ' ' + a[4]);
+    const dateB = new Date(b[1] + ' ' + b[4]);
     return dateA - dateB;
   });
   
@@ -232,38 +254,52 @@ function writeEventsToSheet(events) {
   sheet.clear();
   sheet.getRange(1, 1, sheet.getMaxRows(), sheet.getMaxColumns()).setBorder(false, false, false, false, false, false);
   
-  const header = [['日付', '曜日', 'カレンダー名', '開始', '終了', '作業時間', '内容', '詳細']];
+  // 新しいヘッダー（10列）
+  const header = [['案件名', '日付', '曜日', 'カレンダー名', '開始', '終了', '作業時間', 'キーワード', '内容', '詳細']];
   const outputData = header.concat(events);
   
-  const range = sheet.getRange(1, 1, outputData.length, outputData[0].length);
+  const numRows = outputData.length;
+  const numCols = outputData[0].length;
+  
+  const range = sheet.getRange(1, 1, numRows, numCols);
   range.setValues(outputData);
   
-  const headerRange = sheet.getRange(1, 1, 1, outputData[0].length);
+  const headerRange = sheet.getRange(1, 1, 1, numCols);
   headerRange.setBackground('#ff6d01')
              .setFontColor('#ffffff')
              .setFontWeight('bold')
              .setHorizontalAlignment('center');
   
-  const dataRange = sheet.getRange(2, 1, events.length, outputData[0].length);
-  sheet.getRange(2, 1, events.length, 5).setHorizontalAlignment('center');
-  sheet.getRange(2, 6, events.length, 1).setHorizontalAlignment('center')
-                                       .setNumberFormat('0.00" h"');
-  
-  dataRange.setBackground(null);
-  for (let i = 0; i < events.length; i++) {
-    if (i % 2 === 1) sheet.getRange(i + 2, 1, 1, outputData[0].length).setBackground('#fff2e6');
+  // データ部分のスタイル設定
+  const dataRows = events.length;
+  if (dataRows > 0) {
+    const dataRange = sheet.getRange(2, 1, dataRows, numCols);
+    dataRange.setBackground(null);
+    
+    // アライメント：案件名〜キーワード（1〜8列目）までを中央揃え、内容・詳細は左揃え
+    sheet.getRange(2, 1, dataRows, 8).setHorizontalAlignment('center');
+    
+    // 作業時間（7列目）のフォーマット
+    sheet.getRange(2, 7, dataRows, 1).setNumberFormat('0.00" h"');
+    
+    // 縞々模様
+    for (let i = 0; i < dataRows; i++) {
+      if (i % 2 === 1) sheet.getRange(i + 2, 1, 1, numCols).setBackground('#fff2e6');
+    }
   }
   
   range.setBorder(true, true, true, true, true, true, '#cccccc', SpreadsheetApp.BorderStyle.SOLID);
   sheet.setFrozenRows(1);
-  sheet.autoResizeColumns(1, outputData[0].length);
   
-  sheet.setColumnWidth(1, 110);
-  sheet.setColumnWidth(2, 50);
-  sheet.setColumnWidth(3, 180);
-  sheet.setColumnWidth(4, 70);
-  sheet.setColumnWidth(5, 70);
-  sheet.setColumnWidth(6, 100);
-  sheet.setColumnWidth(7, 350);
-  sheet.setColumnWidth(8, 450);
+  // 列幅の設定
+  sheet.setColumnWidth(1, 150); // 案件名
+  sheet.setColumnWidth(2, 110); // 日付
+  sheet.setColumnWidth(3, 50);  // 曜日
+  sheet.setColumnWidth(4, 180); // カレンダー名
+  sheet.setColumnWidth(5, 70);  // 開始
+  sheet.setColumnWidth(6, 70);  // 終了
+  sheet.setColumnWidth(7, 100); // 作業時間
+  sheet.setColumnWidth(8, 150); // キーワード
+  sheet.setColumnWidth(9, 350); // 内容
+  sheet.setColumnWidth(10, 450); // 詳細
 }

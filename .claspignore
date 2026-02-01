@@ -1,0 +1,22 @@
+# Ignore all files
+**/**
+
+# Allow GAS source files
+!appsscript.json
+!code.js
+
+# Allow specific documentation if needed (usually not)
+# !README.md
+
+# Ignore development specific files even if they match above (safety)
+.clasp.json
+.clasp.env.json
+package.json
+package-lock.json
+node_modules/**
+scripts/**
+spec/**
+.gitignore
+LICENSE
+DEVELOPMENT.md
+_config.yml
