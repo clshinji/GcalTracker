@@ -101,7 +101,7 @@ function updateHelpSheet() {
 }
 
 /**
- * 取得可能なカレンダーの一覧を「設定」シートのF列に書き出します。
+ * 取得可能なカレンダーの一覧を「設定」シートのG列に書き出します。
  */
 function updateCalendarList() {
   const ui = SpreadsheetApp.getUi();
@@ -113,26 +113,26 @@ function updateCalendarList() {
     const calendars = CalendarApp.getAllCalendars();
     const calendarNames = calendars.map(cal => [cal.getName()]);
     
-    const headerRange = sheet.getRange('F1');
+    const headerRange = sheet.getRange('G1');
     headerRange.setValue('利用可能なカレンダー一覧')
                .setBackground('#ff6d01')
                .setFontColor('#ffffff')
                .setFontWeight('bold')
                .setHorizontalAlignment('center');
                
-    sheet.getRange('F2:F' + sheet.getMaxRows()).clearContent().setBackground(null).setBorder(false, false, false, false, false, false);
+    sheet.getRange('G2:G' + sheet.getMaxRows()).clearContent().setBackground(null).setBorder(false, false, false, false, false, false);
     
     if (calendarNames.length > 0) {
-      const dataRange = sheet.getRange(2, 6, calendarNames.length, 1);
+      const dataRange = sheet.getRange(2, 7, calendarNames.length, 1);
       dataRange.setValues(calendarNames);
-      const range = sheet.getRange(1, 6, calendarNames.length + 1, 1);
+      const range = sheet.getRange(1, 7, calendarNames.length + 1, 1);
       range.setBorder(true, true, true, true, true, true, '#cccccc', SpreadsheetApp.BorderStyle.SOLID);
       for (let i = 0; i < calendarNames.length; i++) {
-        if (i % 2 === 1) sheet.getRange(i + 2, 6).setBackground('#fff2e6');
+        if (i % 2 === 1) sheet.getRange(i + 2, 7).setBackground('#fff2e6');
       }
     }
-    sheet.setColumnWidth(6, 250);
-    ui.alert('カレンダー一覧を更新しました。F列を確認してください。');
+    sheet.setColumnWidth(7, 250);
+    ui.alert('カレンダー一覧を更新しました。G列を確認してください。');
   } catch (e) {
     ui.alert('エラーが発生しました：\n' + e.message);
   }
